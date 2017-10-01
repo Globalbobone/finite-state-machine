@@ -30,12 +30,12 @@ class FSM {
      */
     changeState(state) { //+-
         //this.state = state;
-        if (this.state === this.one) {
+        if (this.state == this.one) {
             throw Error;
         }
         else {
             this.state = state;
-            this.arrhystory.push(this.state);
+           // this.arrhystory.push(this.state);
         }
         //this.state = state;
     }
@@ -63,8 +63,11 @@ class FSM {
      * @returns {Array}
      */
     getStates(event) { //--
-        if (event = this.config.states[this.state].transitions[event]) {
-            return event;
+       // if (event = this.config.states[this.state].transitions[event]) {
+       //     return event;
+       // }
+   if(event === null) {
+            return this.config.keys(config.states);
         }
     }
 
