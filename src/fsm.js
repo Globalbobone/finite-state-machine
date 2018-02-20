@@ -1,89 +1,94 @@
 class FSM {
-    /**
-     * Creates new FSM instance.
-     * @param config
-     */
-    constructor(config) { //++
+
+    constructor(config) {
         this.config = config;
-        //this.transitions = config.transitions;
-        this.initial = config.initial;
-        this.state = config.initial;
-        this.arrhistory = [];
-        this.one = Object.keys(config.states);
-        //this.two = Object.keys(this.one);
-        //this.two = Object.keys(config.states[0]);
-        //this.mystates = Object.keys(config.states);
-        //this.transitions = Object.keys(config.transitions);    
-        //this.statesArr = Object.entries(config.states);
-    }
-    /**
-     * Returns active state.
-     * @returns {String}
-     */
-    getState() { //++
-        return this.state;
-        //this.hystory.push(this.state);
-    }
-    /**
-     * Goes to specified state.
-     * @param state
-     */
-    changeState(state) { //+-
-        //this.state = state;
-        if (this.state == this.one) {
-            throw Error;
-        }
-        else {
-            this.state = state;
-           // this.arrhystory.push(this.state);
-        }
-        //this.state = state;
+        this.config.state = this.config.initial;
+        this.config.prevstate = [];
+        this.config.count = 0;
+        this.config.undocount = 0;
+        this.triggercount = 0;
+        this.changestatecount = 0;
+}
+
+    getState() {
+        return this.config.state;
+
+
     }
 
-    /**
-     * Changes state according to event transition rules.
-     * @param event
-     */
-    trigger(event) { //--
-        this.state = this.config.states[this.state].transitions[event];
-        this.arrhistory.push(this.state);
+    changeState(state) {
+        if(state in this.config.states){
+        this.config.prevstate[this.config.count] = this.config.state;
+        this.config.count = +this.config.count + 1;
+        this.config.state = state;
+        this.changestatecount ++;
+
+
+    }
+    else error(function() {
+    });
+
     }
 
-    /**
-     * Resets FSM state to initial.
-     */
-    reset() { //--
-        return this.state = this.initial;
-    }
-
-    /**
-     * Returns an array of states for which there are specified event transition rules.
-     * Returns all states if argument is undefined.
-     * @param event
-     * @returns {Array}
-     */
-    getStates(event) { //--
-       // if (event = this.config.states[this.state].transitions[event]) {
-       //     return event;
-       // }
-   if(event === null) {
-            return this.config.keys(config.states);
+    trigger(event) {
+    var key = this.config.state;
+        if(this.config.states[key].transitions[event]){
+            this.config.prevstate[this.config.count] = this.config.state;
+            this.config.count = +this.config.count + 1;
+            this.config.state =  this.config.states[key].transitions[event];
+            this.triggercount++;
         }
+        else error(function() {
+
+        });
+
+    
+
     }
 
-    /**
-     * Goes back to previous state.
-     * Returns false if undo is not available.
-     * @returns {Boolean}
-     */
-    undo() { //+-
-        if (this.arrhistory.length > 1) {
-            this.state = this.arrhistory[this.arrhistory.length-1];
-            return true;
+    reset() {
+        this.config.state = this.config.initial;
+
+    }
+
+    getStates(event) {
+        var array = [];
+        var i = 0;
+        if(event == null){
+        for(var key in this.config.states){
+            array[i] = key;
+            i++;
         }
-        else {
+        return array;
+    }
+
+    for(var key in this.config.states){
+        if(this.config.states[key].transitions[event]){
+         array[i] = key;
+        i++;   
+        }
+
+    }
+     return array;   
+    }
+
+    undo() {
+        if(!this.config.prevstate[0] ){
             return false;
-        }           
+        }
+        if(this.config.count < 1){
+            return false;
+        }
+        if ( this.config.count >= 1 ){
+        this.config.prevstate[this.config.count] = this.config.state;   
+        this.config.count = +this.config.count - 1;
+        this.config.state = this.config.prevstate[this.config.count];
+        this.config.undocount = +this.config.undocount + 1;
+        this.triggercount = 0;
+        this.changestatecount = 0;
+        return true;
+    }
+
     }
 
     /**
@@ -91,32 +96,30 @@ class FSM {
      * Returns false if redo is not available.
      * @returns {Boolean}
      */
-    redo() { //+-
-        if (this.arrhistory.length > 0) {
-            this.state = this.arrhistory[this.arrhistory.length];
-            return true;
-        }
-        else {
+    redo() {
+        if(!this.config.prevstate[0]  || this.config.undocount < 1 || 
+            this.triggercount > 0 || this.changestatecount > 0 ){
             return false;
-        }           
+        }
+        this.config.count = (+this.config.count + 1 ) ;
+        this.config.state = this.config.prevstate[this.config.count];
+        this.config.undocount = +this.config.undocount - 1;
+        this.triggercount = 0;
+        this.changestatecount = 0;
+        
+        return true;
+    
     }
 
     /**
      * Clears transition history
      */
-    clearHistory() { //++
-        /*if (this.history.length === 0) {
-            return true;   
-         }
-        else {
-            return false;
-         }*/
-        this.arrhistory.length = 0;
-        
+    clearHistory() {
+        this.config.prevstate = [];
+        this.config.count = 0;
     }
-   
+
 }
 
-module.exports = FSM;
 
-/** @Created by Uladzimir Halushka **/
+module.exports = FSM;
